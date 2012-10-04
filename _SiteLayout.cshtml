@@ -16,30 +16,12 @@
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title"><a href="~/">ここにロゴを入れてください</a></p>
+                    <p class="site-title"><a href="~/">TypeScript Fun!</a></p>
                 </div>
                 <div class="float-right">
-                    <section id="login">
-                        @if (WebSecurity.IsAuthenticated) {
-                            <text>
-                                Hello, <a class="email" href="~/Account/Manage" title="Manage">@WebSecurity.CurrentUserName</a> さん!
-                                <form id="logoutForm" action="~/Account/Logout" method="post">
-                                    @AntiForgery.GetHtml()
-                                    <a href="javascript:document.getElementById('logoutForm').submit()">ログアウト</a>
-                                </form>
-                            </text>
-                        } else {
-                            <ul>
-                                <li><a href="~/Account/Register">登録</a></li>
-                                <li><a href="~/Account/Login">ログイン</a></li>
-                            </ul>
-                        }
-                    </section>
                     <nav>
                         <ul id="menu">
                             <li><a href="~/">ホーム</a></li>
-                            <li><a href="~/About">会社情報</a></li>
-                            <li><a href="~/Contact">連絡先</a></li>
                         </ul>
                     </nav>
                 </div>
