@@ -1,0 +1,14 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "アカウントのロック";
+}
+
+<hgroup class="title">
+    <h1 class="error">@Page.Title.</h1>
+    <h2 class="error">無効なログインが何度も試行されたため、アカウントがロックアウトされました。</h2>
+</hgroup>
+
+<p>
+    アカウントは 60 秒後に自動的にロック解除されます。
+    60 秒経過したら再試行してください。
+</p>

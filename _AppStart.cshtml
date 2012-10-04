@@ -1,0 +1,28 @@
+﻿@{
+    WebSecurity.InitializeDatabaseConnection("StarterSite", "UserProfile", "UserId", "Email", autoCreateTables: true);
+
+    // このサイトのユーザーが、Microsoft、Facebook、Twitter などの他のサイトのアカウントを使用してログインできるようにするには、
+    // このサイトを更新する必要があります。詳細については、http://go.microsoft.com/fwlink/?LinkID=226949 を参照してください
+
+    //OAuthWebSecurity.RegisterMicrosoftClient(
+    //    clientId: "",
+    //    clientSecret: "");
+
+    //OAuthWebSecurity.RegisterTwitterClient(
+    //    consumerKey: "",
+    //    consumerSecret: "");
+
+    //OAuthWebSecurity.RegisterFacebookClient(
+    //    appId: "",
+    //    appSecret: "");
+
+    //OAuthWebSecurity.RegisterGoogleClient();
+
+    //WebMail.SmtpServer = "mailserver.example.com";
+    //WebMail.EnableSsl = true;
+    //WebMail.UserName = "username@example.com";
+    //WebMail.Password = "your-password";
+    //WebMail.From = "your-name-here@example.com";
+
+    // サイトでスクリプトとスタイルシートを最適化する方法の詳細については、http://go.microsoft.com/fwlink/?LinkID=248973 を参照してください
+}

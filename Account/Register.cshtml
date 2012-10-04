@@ -1,0 +1,135 @@
+﻿@* バンドルを使用している場合はこのセクションを削除します *@
+@section Scripts {
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+}
+
+@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "登録";
+
+    // 全般的なページ変数を初期化します
+    var email = "";
+    var password = "";
+    var confirmPassword = "";
+
+    // セットアップ検証
+Validation.RequireField("email", "電子メール アドレスを入力してください.");
+    Validation.RequireField("password", "パスワードを空白にすることはできません.");
+    Validation.Add("confirmPassword",
+        Validator.EqualsTo("password", "パスワードと確認のパスワードが一致しません."));
+    Validation.Add("password",
+        Validator.StringLength(
+            maxLength: Int32.MaxValue,
+            minLength: 6,
+            errorMessage: "パスワードは 6 文字以上にする必要があります"));
+
+    // これが POST 要求の場合、データを検証して処理します
+    if (IsPost) {
+        AntiForgery.Validate();
+        email = Request.Form["email"];
+        password = Request.Form["password"];
+        confirmPassword = Request.Form["confirmPassword"];
+
+        // ユーザーの captcha の回答を検証します
+        // if (!ReCaptcha.Validate("PRIVATE_KEY")) {
+        //     ModelState.AddError("recaptcha", "Captcha の応答が間違っています");
+        // }
+
+        // すべての情報が有効な場合、新しいアカウントを作成します
+        if (Validation.IsValid()) {
+            // データベースに新しいユーザーを挿入します
+            var db = Database.Open("StarterSite");
+
+            // ユーザーが既に存在するかどうかを確認します
+            var user = db.QuerySingle("SELECT Email FROM UserProfile WHERE LOWER(Email) = LOWER(@0)", email);
+            if (user == null) {
+                // プロファイル テーブルに電子メール アドレスを挿入します
+                db.Execute("INSERT INTO UserProfile (Email) VALUES (@0)", email);
+
+// メンバーシップ データベースに新しいエントリを作成して関連付けます。
+// 正常に完了した場合は、要求の処理を続行します
+                try {
+                    bool requireEmailConfirmation = !WebMail.SmtpServer.IsEmpty();
+                    var token = WebSecurity.CreateAccount(email, password, requireEmailConfirmation);
+                    if (requireEmailConfirmation) {
+                        var hostUrl = Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+                        var confirmationUrl = hostUrl + VirtualPathUtility.ToAbsolute("~/Account/Confirm?confirmationCode=" + HttpUtility.UrlEncode(token));
+
+                        WebMail.Send(
+                            to: email,
+subject: "アカウントを確認してください",
+                            body: "確認コード: : " + token + ". Visit <a href=\"" + confirmationUrl + "\">" + confirmationUrl + "</a> にアクセスしてアカウントを有効にしてください."
+                        );
+                    }
+
+                    if (requireEmailConfirmation) {
+                        // ユーザーの登録に感謝し、間もなく電子メールが届くことを伝えます
+                        Response.Redirect("~/Account/Thanks");
+                    } else {
+                        // ホームページに移動して終了します
+                        WebSecurity.Login(email, password);
+
+                        Response.Redirect("~/");
+                    }
+                } catch (System.Web.Security.MembershipCreateUserException e) {
+                    ModelState.AddFormError(e.Message);
+                }
+            } else {
+// ユーザーは既に存在します
+                ModelState.AddFormError("Email address is already in use.");
+            }
+        }
+    }
+}
+
+<hgroup class="title">
+    <h1>@Page.Title.</h1>
+<h2>新しいアカウントを作成します.</h2>
+</hgroup>
+
+<form method="post">
+    @AntiForgery.GetHtml()
+@* 検証エラーが 1 つでも存在する場合、ユーザーに通知します *@
+@Html.ValidationSummary("アカウントの作成に失敗しました。エラーを修正し、再試行してください.", excludeFieldErrors: true, htmlAttributes: null)
+
+    <fieldset>
+<legend>登録フォーム</legend>
+        <ol>
+            <li class="email">
+<label for="email" @if(!ModelState.IsValidField("email")){<text>class="error-label"</text>}>電子メール アドレス</label>
+                <input type="text" id="email" name="email" value="@email" @Validation.For("email") />
+@* 電子メール検証エラーをページに書き込みます *@
+                @Html.ValidationMessage("email")
+            </li>
+            <li class="password">
+<label for="password" @if(!ModelState.IsValidField("password")) {<text>class="error-label"</text>}>パスワード</label>
+                <input type="password" id="password" name="password" @Validation.For("password") />
+                @* パスワード検証エラーをページに書き込みます *@
+                @Html.ValidationMessage("password")
+            </li>
+            <li class="confirm-password">
+<label for="confirmPassword" @if(!ModelState.IsValidField("confirmPassword")) {<text>class="error-label"</text>}>パスワードの確認入力</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" @Validation.For("confirmPassword") />
+                @* パスワード検証エラーをページに書き込みます *@
+                @Html.ValidationMessage("confirmPassword")
+            </li>
+            <li class="recaptcha">
+                <div class="message-info">
+                    <p>
+ CAPTCHA  確認を有効にするには、, <a href="http://go.microsoft.com/fwlink/?LinkId=204140">  
+ASP.NET Web Helpers Library</a> をインストールし、ReCaptcha.GetHtml のコメントを解除して、'PUBLIC_KEY'
+ を公開キーに置き換えます。このページの先頭で、ReCaptcha. Validate のコメントを解除し、
+'PRIVATE_KEY' を秘密キーに置き換えます。
+reCAPTCHA のキーの登録を次の場所で行います:  <a href="http://recaptcha.net">reCAPTCHA.net</a>.
+                    </p>
+                </div>
+                @*
+                @ReCaptcha.GetHtml("PUBLIC_KEY", theme: "white")
+                @Html.ValidationMessage("recaptcha")
+                *@
+            </li>
+        </ol>
+        <input type="submit" value="Register" />
+    </fieldset>
+</form>

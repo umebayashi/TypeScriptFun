@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "登録確認ページ";
+
+    string message = "";
+    var confirmationToken = Request["confirmationCode"];
+
+    WebSecurity.Logout();
+    if (!confirmationToken.IsEmpty()) {
+        if (WebSecurity.ConfirmAccount(confirmationToken)) {
+            message = "登録を確認しました。[ログイン] タブをクリックしてサイトにログインしてください。";
+        } else {
+            message = "登録情報を確認できませんでした。";
+        }
+    }
+}
+
+<hgroup class="title">
+    <h1>@Page.Title.</h1>
+    <h2>アカウントを確認するには、次のフォームを使用します。</h2>
+</hgroup>
+
+@if (!message.IsEmpty()) {
+    <p>@message</p>
+} else {
+    <form method="post">
+        <fieldset>
+            <legend>確認コード</legend>
+            <ol>
+                <li>
+                    <label for="confirmationCode">確認コード</label>
+                    <input type="text" id="confirmationCode" name="confirmationCode" />
+                </li>
+            </ol>
+            <input type="submit" value="確認" />
+        </fieldset>
+    </form>
+}

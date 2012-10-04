@@ -1,0 +1,25 @@
+﻿@{
+    // レイアウト ページとページ タイトルを設定します
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "ご登録ありがとうございます";
+}
+
+@if (!WebSecurity.IsAuthenticated) {
+    <hgroup class="title">
+        <h1>@Page.Title.</h1>
+        <h2>しかし、まだ完了していません。</h2>
+    </hgroup>
+
+    <p>
+       間もなくアカウントを有効にする方法が記載された電子メールが届きます。
+    </p>
+} else {
+    <hgroup class="title">
+        <h1>@Page.Title.</h1>
+        <h2>これで終わりです。</h2>
+    </hgroup>
+
+    <p>
+        アカウントの確認は既に完了していて準備は整っているようです。
+    </p>
+}
